@@ -1,6 +1,6 @@
-# If using Python 3.10 on Streamlit Cloud, make sure these are compatible
-# You can pin versions for stability if needed:
-# streamlit==1.34.0
-# pandas==2.2.2
-# praw==7.7.1
-# snscrape==0.7.0.20230110
+
+streamlit
+pandas
+requests
+praw
+snscrape==0.7.0.20230110
