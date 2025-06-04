@@ -1,6 +1,11 @@
-
 streamlit
 pandas
 requests
+beautifulsoup4
+google-auth
+gspread
+openai
+tweepy
 praw
+langdetect
 snscrape==0.7.0.20230110
