@@ -15,7 +15,6 @@ reddit = praw.Reddit(
 
 # === APP CONFIG ===
 st.set_page_config(page_title="Fiverr Pro Affiliate Responder", layout="wide")
-
 st.title("🎯 Fiverr Pro Affiliate Responder Dashboard")
 
 # === SIDEBAR INPUTS ===
@@ -24,6 +23,10 @@ with st.sidebar:
     fiverr_affiliate_id = st.text_input("Enter your Fiverr Affiliate ID", "1119137")
     user_services = st.text_area("Enter Fiverr Services (comma-separated)", "logo design, website development, SEO, animation, voice over, resume writing")
     max_posts = st.slider("How many Reddit posts to fetch?", 10, 100, 20)
+
+    # 👇 Custom subreddit input
+    custom_subs_input = st.text_input("Target Subreddits (comma-separated)", "freelance, forhire, smallbusiness, hiring, entrepreneur, digital_marketing")
+    target_subreddits = [sub.strip() for sub in custom_subs_input.split(",") if sub.strip()]
 
 # === SERVICE KEYWORDS PREP ===
 services = [s.strip().lower() for s in user_services.split(",") if s.strip()]
@@ -50,20 +53,26 @@ reddit_posts = []
 
 # === REDDIT SCRAPING ===
 st.subheader("🔺 Reddit Posts Matching Your Services")
-for submission in reddit.subreddit("all").search(" OR ".join(keywords), limit=max_posts):
-    content = submission.title.lower() + " " + submission.selftext.lower()
-    for kw in keywords:
-        if kw in content:
-            gig_url = generate_affiliate_link(gig_urls[kw], fiverr_affiliate_id)
-            reply = generate_reply(kw, gig_url)
-            reddit_posts.append({
-                "platform": "Reddit",
-                "content": submission.title,
-                "matched_service": kw,
-                "fiverr_url": gig_url,
-                "reply": reply
-            })
-            break
+
+try:
+    for sub in target_subreddits:
+        for submission in reddit.subreddit(sub).search(" OR ".join(keywords), limit=max_posts):
+            content = submission.title.lower() + " " + submission.selftext.lower()
+            for kw in keywords:
+                if kw in content:
+                    gig_url = generate_affiliate_link(gig_urls[kw], fiverr_affiliate_id)
+                    reply = generate_reply(kw, gig_url)
+                    reddit_posts.append({
+                        "platform": "Reddit",
+                        "content": submission.title,
+                        "matched_service": kw,
+                        "fiverr_url": gig_url,
+                        "reply": reply
+                    })
+                    break
+except Exception as e:
+    st.error("❌ Error while fetching Reddit posts. Please check your API credentials or subreddit names.")
+    st.exception(e)
 
 # === DISPLAY POSTS ===
 df = pd.DataFrame(reddit_posts)
