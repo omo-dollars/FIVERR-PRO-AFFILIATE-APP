@@ -1,12 +1,9 @@
-
-
 import streamlit as st
 import pandas as pd
 import re
 import requests
 import random
 import datetime
-import snscrape.modules.twitter as sntwitter
 import praw
 
 # === SETUP REDDIT API ===
@@ -26,7 +23,7 @@ with st.sidebar:
     st.header("🔧 Settings")
     fiverr_affiliate_id = st.text_input("Enter your Fiverr Affiliate ID", "1119137")
     user_services = st.text_area("Enter Fiverr Services (comma-separated)", "logo design, website development, SEO, animation, voice over, resume writing")
-    max_posts = st.slider("How many posts to fetch?", 10, 100, 20)
+    max_posts = st.slider("How many Reddit posts to fetch?", 10, 100, 20)
 
 # === SERVICE KEYWORDS PREP ===
 services = [s.strip().lower() for s in user_services.split(",") if s.strip()]
@@ -49,31 +46,10 @@ def generate_reply(service, fiverr_url):
 gig_urls = {s: f"https://www.fiverr.com/pro/{s.replace(' ', '-')}" for s in services}
 
 # === RESULTS STORAGE ===
-results = []
-
-# === TWITTER SCRAPING ===
-st.subheader("🐦 Twitter Posts Matching Your Services")
-twitter_posts = []
-for i, tweet in enumerate(sntwitter.TwitterSearchScraper(' OR '.join(keywords)).get_items()):
-    if i >= max_posts:
-        break
-    content = tweet.content.lower()
-    for kw in keywords:
-        if kw in content:
-            gig_url = generate_affiliate_link(gig_urls[kw], fiverr_affiliate_id)
-            reply = generate_reply(kw, gig_url)
-            twitter_posts.append({
-                "platform": "Twitter",
-                "content": tweet.content,
-                "matched_service": kw,
-                "fiverr_url": gig_url,
-                "reply": reply
-            })
-            break
+reddit_posts = []
 
 # === REDDIT SCRAPING ===
 st.subheader("🔺 Reddit Posts Matching Your Services")
-reddit_posts = []
 for submission in reddit.subreddit("all").search(" OR ".join(keywords), limit=max_posts):
     content = submission.title.lower() + " " + submission.selftext.lower()
     for kw in keywords:
@@ -89,12 +65,11 @@ for submission in reddit.subreddit("all").search(" OR ".join(keywords), limit=ma
             })
             break
 
-# === COMBINE & DISPLAY POSTS ===
-all_posts = twitter_posts + reddit_posts
-df = pd.DataFrame(all_posts)
+# === DISPLAY POSTS ===
+df = pd.DataFrame(reddit_posts)
 
 if not df.empty:
-    st.success(f"Found {len(df)} matching posts.")
+    st.success(f"Found {len(df)} matching Reddit posts.")
     for idx, row in df.iterrows():
         with st.expander(f"📌 {row['platform']} - {row['matched_service'].title()}"):
             st.write(row["content"])
@@ -121,7 +96,7 @@ if not df.empty:
     )
 
 else:
-    st.warning("No posts found matching the provided Fiverr services.")
+    st.warning("No Reddit posts found matching the provided Fiverr services.")
 
 # === FOOTER ===
 st.markdown("---")
