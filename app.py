@@ -7,7 +7,9 @@ import praw
 reddit = praw.Reddit(
     client_id="FbY5KaRrqILcU7SDGizJXg",
     client_secret="T2zo2U3TUAuSeHOjtxDJJNYiXe3MSw",
-    user_agent="Fiverr Affiliate Promotion"
+    user_agent="Fiverr Affiliate Promotion",
+    username="fiverr_affiliate_bot",
+    password="cre111ate"
 )
 
 # === APP CONFIG ===
