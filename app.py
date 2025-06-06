@@ -9,7 +9,8 @@ reddit = praw.Reddit(
     client_secret="T2zo2U3TUAuSeHOjtxDJJNYiXe3MSw",
     user_agent="Fiverr Affiliate Promotion",
     username="fiverr_affiliate_bot",
-    password="cre111ate"
+    password="cre111ate",
+    check_for_async=False  # Prevent async loop issues with Streamlit
 )
 
 # === APP CONFIG ===
@@ -24,7 +25,7 @@ with st.sidebar:
     user_services = st.text_area("Fiverr Pro Services (comma-separated)", 
         "logo design, website development, SEO, animation, voice over, resume writing, app development, mobile app, business card, brochure design, content writing, UX design, UI design, digital marketing, video editing, explainer video, motion graphics, translation, transcription, podcast editing, social media management, ads management, data analysis, data entry, game development, Shopify store, dropshipping, branding, pitch deck, investor presentation, NFT art, 3D modeling, WordPress, cybersecurity, email marketing, market research, product design, photography, illustration, CAD drawing, architecture"
     )
-    max_posts = st.slider("Number of Reddit posts to fetch", 10, 100, 20)
+    max_posts = st.slider("Number of Reddit posts to fetch per subreddit", 10, 100, 20)
 
 # === SERVICE KEYWORDS PREP ===
 services = [s.strip().lower() for s in user_services.split(",") if s.strip()]
@@ -55,7 +56,8 @@ st.subheader("Matching Reddit Posts")
 try:
     subreddits = [s.strip() for s in subreddit_input.split(",") if s.strip()]
     for subreddit in subreddits:
-        for submission in reddit.subreddit(subreddit).search(" OR ".join(keywords), limit=max_posts):
+        st.info(f"Searching r/{subreddit}...")
+        for submission in reddit.subreddit(subreddit).hot(limit=max_posts):
             content = (submission.title + " " + submission.selftext).lower()
             for kw in keywords:
                 if kw in content:
@@ -68,9 +70,9 @@ try:
                         "fiverr_url": gig_url,
                         "reply": reply
                     })
-                    break
+                    break  # Only match once per post
 except Exception as e:
-    st.error("Error fetching Reddit posts. Check your Reddit API credentials and network.")
+    st.error(f"❌ Error fetching Reddit posts: {e}")
     st.stop()
 
 # === DISPLAY RESULTS ===
@@ -97,7 +99,7 @@ if not df.empty:
         mime="text/csv"
     )
 else:
-    st.warning("No matching Reddit posts found.")
+    st.warning("⚠️ No matching Reddit posts found.")
 
 # === FOOTER ===
 st.markdown("---")
