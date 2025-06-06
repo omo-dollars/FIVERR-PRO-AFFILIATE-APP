@@ -20,7 +20,7 @@ st.title("Fiverr Pro Affiliate Responder Dashboard")
 with st.sidebar:
     st.header("Settings")
     fiverr_affiliate_id = "1119137"  # Hardcoded affiliate ID
-    subreddit_input = st.text_input("Subreddit(s) to search (comma-separated)", "all")
+    subreddit_input = st.text_input("Subreddit(s) to search", "freelance,forhire,test")
     user_services = st.text_area("Fiverr Pro Services (comma-separated)", 
         "logo design, website development, SEO, animation, voice over, resume writing, app development, mobile app, business card, brochure design, content writing, UX design, UI design, digital marketing, video editing, explainer video, motion graphics, translation, transcription, podcast editing, social media management, ads management, data analysis, data entry, game development, Shopify store, dropshipping, branding, pitch deck, investor presentation, NFT art, 3D modeling, WordPress, cybersecurity, email marketing, market research, product design, photography, illustration, CAD drawing, architecture"
     )
